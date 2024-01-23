@@ -1,5 +1,6 @@
 // models/flashcard.js
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize')
+const Joi = require('joi');
 
 module.exports = (sequelize) => {
   const Flashcard = sequelize.define('Flashcard', {
@@ -23,11 +24,28 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('public', 'private'),
       defaultValue: 'public',
     },
-  });
+  })
 
-  Flashcard.associate = (models) => {
-    Flashcard.belongsTo(models.Deck, { foreignKey: 'deckId', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+  Flashcard.validateFlashcard = (data) => {
+    const schema = Joi.object({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
+      indice: Joi.string(),
+      additionalAnswer: Joi.string(),
+      visibility: Joi.string().valid('public', 'private').default('public'),
+      deckId: Joi.number().integer().min(1),
+    });
+
+    return schema.validate(data);
   };
 
-  return Flashcard;
-};
+  Flashcard.associate = (models) => {
+    Flashcard.belongsTo(models.Deck, {
+      foreignKey: 'deckId',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    })
+  }
+
+  return Flashcard
+}
