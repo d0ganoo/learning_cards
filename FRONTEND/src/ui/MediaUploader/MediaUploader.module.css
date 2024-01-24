@@ -1,0 +1,31 @@
+.uploadeContainer {
+  display: flex;
+  flex-wrap: wrap;
+}
+.mediaContainer {
+  display: flex;
+  flex-direction: column;
+  width: 102px;
+  height: 104px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 5px;
+  margin: 0px 5px 5px 0px;
+}
+
+.image {
+  width: 90px;
+  height: 75px;
+}
+
+.document {
+  height: 75px;
+  font-size: 30px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.removeIcon {
+  color: red;
+  margin-top: 5px;
+}
