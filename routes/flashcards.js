@@ -1,12 +1,22 @@
-const express = require('express')
-const { validateFlashcard } = require('../models/flashcard')
-const flashcardModel = require('../models/flashcard')
-const router = express.Router()
+const Joi = require('joi');
+const { Flashcard } = require('../db/sequelize')
 
-module.exports = (sequelize) => { 
-  const Flashcard = flashcardModel(sequelize)
+module.exports = (app) => { 
+
+  const validateFlashcard = (data) => {
+    const schema = Joi.object({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
+      indice: Joi.string(),
+      additionalAnswer: Joi.string(),
+      visibility: Joi.string().valid('public', 'private').default('public'),
+      deckId: Joi.number().integer().min(1),
+    });
+
+    return schema.validate(data);
+  };
   // Route pour obtenir toutes les flashcards
-  router.get('/', async (req, res) => {
+  app.get('/flashcards', async (req, res) => {
     console.log('Début de la route /flashcards')
     try {
       const flashcards = await Flashcard.findAll()
@@ -18,7 +28,7 @@ module.exports = (sequelize) => {
   })
 
   // Route pour obtenir une flashcard par ID
-  router.get('/:id', async (req, res) => {
+  app.get('/flashcards/:id', async (req, res) => {
     const { id } = req.params
     try {
       const flashcard = await Flashcard.findByPk(id)
@@ -34,7 +44,7 @@ module.exports = (sequelize) => {
   })
 
   // Route pour créer une nouvelle flashcard avec validation
-  router.post('/', async (req, res) => {
+  app.post('/flashcards', async (req, res) => {
     const { error, value } = validateFlashcard(req.body)
 
     if (error) {
@@ -68,7 +78,7 @@ module.exports = (sequelize) => {
   })
 
   // Route pour modifier une flashcard avec validation
-  router.put('/:id', async (req, res) => {
+  app.put('/flashcards/:id', async (req, res) => {
     const { id } = req.params
 
     const { error, value } = validateFlashcard(req.body)
@@ -110,7 +120,7 @@ module.exports = (sequelize) => {
   })
 
   // Route pour supprimer une flashcard
-  router.delete('/:id', async (req, res) => {
+  app.delete('/flashcards/:id', async (req, res) => {
     const { id } = req.params
 
     try {
@@ -128,6 +138,4 @@ module.exports = (sequelize) => {
       res.status(500).send('Erreur serveur')
     }
   })
-
-  return router
 }

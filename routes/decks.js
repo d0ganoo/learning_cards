@@ -1,12 +1,8 @@
-const express = require('express');
-const flashcardModel = require('../models/flashcard');
+const { Flashcard } = require('../db/sequelize');
 
-const router = express.Router();
+module.exports = (app) => {
 
-module.exports = (sequelize) => {
-  const Flashcard = flashcardModel(sequelize);
-
-  router.get('/:deckId/flashcards', async (req, res) => {
+  app.get('/decks/:deckId/flashcards', async (req, res) => {
     const { deckId } = req.params;
 
     try {
@@ -21,5 +17,4 @@ module.exports = (sequelize) => {
     }
   });
 
-  return router;
 };

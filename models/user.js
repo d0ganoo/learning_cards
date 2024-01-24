@@ -20,12 +20,16 @@ module.exports = (sequelize) => {
     username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        msg: 'Le nom est déjà pris.'
+      }
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        msg: 'Cet email a déjà associé à un compte.'
+      },
       validate: {
         isEmail: true,
       },

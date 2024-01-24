@@ -1,35 +1,32 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const { Sequelize } = require('sequelize');
-
-const flashcardsRoutes = require('./routes/flashcards');
-const decksRoutes = require('./routes/decks');
-const usersRoutes = require('./routes/decks');
+const sequelize = require('./db/sequelize')
+const cors = require('cors');
 
 const app = express();
+const port = process.env.PORT || 3000
 
-// Configuration Sequelize
-const sequelize = new Sequelize({
-  dialect: 'mysql',
-  host: 'localhost',
-  username: 'root',
-  password: '',
-  database: 'flashcards_db',
-});
 
 // Middlewares
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-app.use(express.json());
+app
+  .use(morgan('dev'))
+  .use(bodyParser.json())
+  .use(cors())
+  .use(express.json());
+
+sequelize.initDb();
 
 // Routes
-app.use('/flashcards', flashcardsRoutes(sequelize));
-app.use('/decks', decksRoutes(sequelize));
-app.use('/users', usersRoutes(sequelize));
+require('./routes/flashcards')(app)
+require('./routes/decks')(app)
+require('./routes/users')(app)
+require('./routes/login')(app)
 
-// Port d'écoute
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// On gère les routes 404.
+app.use(({res}) => {
+  const message = 'Impossible de trouver la ressource demandée ! Vous pouvez essayer une autre URL.'
+	res.status(404).json({message});
 });
+
+app.listen(port, () => console.log(`Notre application Node est démarrée sur : http://localhost:${port}`))
