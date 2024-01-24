@@ -6,10 +6,7 @@ const router = express.Router();
 module.exports = (sequelize) => {
   const Flashcard = flashcardModel(sequelize);
 
-    console.log("fdsfsldf")
-
   router.get('/:deckId/flashcards', async (req, res) => {
-    console.log("Début de la route /decks/:deckId/flashcards");
     const { deckId } = req.params;
 
     try {

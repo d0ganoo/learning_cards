@@ -85,5 +85,42 @@ module.exports = [
       deckId: 3,
     },
   },
+
+  {
+    model: 'User',
+    data: {
+      lastname: 'Dupont',
+      firstname: 'Alice',
+      username: 'alice_dupont',
+      email: 'alice.dupont@example.com',
+      password: 'motdepasse123', // Assure-toi de stocker les mots de passe de manière sécurisée en production
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  },
+  {
+    model: 'User',
+    data: {
+      lastname: 'Martin',
+      firstname: 'Bob',
+      username: 'bob_martin',
+      email: 'bob.martin@example.com',
+      password: 'secret123',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  },
+  {
+    model: 'User',
+    data: {
+      lastname: 'Lefevre',
+      firstname: 'Charles',
+      username: 'charles_lefevre',
+      email: 'charles.lefevre@example.com',
+      password: 'password456',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  },
   // Ajoute d'autres fixtures si nécessaire
 ];
