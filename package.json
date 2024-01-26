@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
     "migrate": "npx sequelize-cli db:migrate",
-    "fixtures": "node ./Fixtures/run_fixtures.js"
+    "fixtures": "node ./src/Fixtures/run_fixtures.js"
   },
   "keywords": [],
   "author": "",
