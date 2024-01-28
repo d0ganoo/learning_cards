@@ -32,6 +32,11 @@ module.exports = (sequelize) => {
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
     })
+    Flashcard.belongsTo(models.User, {
+      foreignKey: 'creatorId',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    })
   }
 
   return Flashcard
