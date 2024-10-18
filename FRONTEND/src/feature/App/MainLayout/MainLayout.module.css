@@ -24,7 +24,6 @@
   position: fixed;
   margin-top: 64px;
   width: 100% !important;
-  padding-left: 225px;
   z-index: 1;
 }
 
@@ -38,8 +37,5 @@
 @media (max-width: 1281px) {
   .header {
     padding-right: 20px;
-  }
-  .content {
-    padding-left: 65px;
   }
 }

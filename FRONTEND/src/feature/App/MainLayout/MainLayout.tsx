@@ -33,7 +33,7 @@ export const MainLayout: React.FC = ({ children }) => {
 
   return (
     <Layout className={styles.root}>
-      <Sider
+      {/* <Sider
         className={styles.sider}
         collapsible
         collapsed={collapsed}
@@ -45,7 +45,7 @@ export const MainLayout: React.FC = ({ children }) => {
           handleDrawer={handleDrawer}
           customerType={"fromager"}
         />
-      </Sider>
+      </Sider> */}
       <Header className={styles.header}>
           <Row style={{ width: '100%'}} justify="end">
             <Space>
