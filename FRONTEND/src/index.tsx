@@ -10,11 +10,11 @@ import { UserProvider } from "./contexts/User/User";
 ReactDOM.render(
   <ConfigProvider locale={frFR}>
     <ClientProvider>
-      <UserProvider>
+      {/* <UserProvider> */}
         <Router>
           <App />
         </Router>
-      </UserProvider>
+      {/* </UserProvider> */}
     </ClientProvider>
   </ConfigProvider>,
   document.querySelector("#root")

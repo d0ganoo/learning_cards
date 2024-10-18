@@ -93,7 +93,7 @@ module.exports = [
       firstname: 'Alice',
       username: 'alice_dupont',
       email: 'alice.dupont@example.com',
-      password: 'motdepasse123', // Assure-toi de stocker les mots de passe de manière sécurisée en production
+      password: '$2a$12$f/tSHfJouEUzgJq47SV/6.QHHMaj7ib1Rj.xV.VZmS/jkt720TCNC', // motdepasse123
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -105,7 +105,7 @@ module.exports = [
       firstname: 'Bob',
       username: 'bob_martin',
       email: 'bob.martin@example.com',
-      password: 'secret123',
+      password: '$2a$12$84ivTj7PyQch20o4RVHwgul.0lNps0pu0JeMwbewbwCsF7Cau99Je', // secret123
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -117,7 +117,7 @@ module.exports = [
       firstname: 'Charles',
       username: 'charles_lefevre',
       email: 'charles.lefevre@example.com',
-      password: 'password456',
+      password: '$2a$12$/DFe8TdWKVu2t8aJcvykgOsK7V6YXguEh2TKe9kRwYwae3qFh.60i', // password456
       createdAt: new Date(),
       updatedAt: new Date(),
     },

@@ -1,5 +1,5 @@
 {
-  "name": "_Front",
+  "name": "Front",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -34,7 +34,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "start": "react-app-rewired --max-old-space-size=8192 start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-app-rewired --max-old-space-size=8192 build",
     "test": "react-app-rewired test --env=jest-environment-jsdom-sixteen",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",

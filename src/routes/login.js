@@ -6,6 +6,8 @@ const privateKey = require('../auth/private_key')
 module.exports = (app) => {
   app.post('/login', (req, res) => {
 
+    console.log("je suis dans la route LOGIN")
+
     User.findOne({ where: { username: req.body.username } }).then(user => {
 
       if(!user) {
