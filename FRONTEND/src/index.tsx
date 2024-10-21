@@ -1,22 +1,28 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './features/App/App';
+import reportWebVitals from './reportWebVitals';
+import { ClientProvider } from './contexts/Client/Client';
+import { UserProvider } from './contexts/User/User';
 import { BrowserRouter as Router } from "react-router-dom";
-import { ConfigProvider } from "antd";
-import frFR from "antd/es/locale/fr_FR";
-import App from "./feature/App/App";
-import { ClientProvider } from "./contexts/Client/Client";
-import { UserProvider } from "./contexts/User/User";
-import 'antd/dist/antd.css';
 
-ReactDOM.render(
-  <ConfigProvider locale={frFR}>
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
     <ClientProvider>
-      {/* <UserProvider> */}
+      <UserProvider>
         <Router>
           <App />
         </Router>
-      {/* </UserProvider> */}
+      </UserProvider>
     </ClientProvider>
-  </ConfigProvider>,
-  document.querySelector("#root")
+  </React.StrictMode>
 );
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();

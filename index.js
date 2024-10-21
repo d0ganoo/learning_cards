@@ -24,6 +24,7 @@ sequelize.initDb();
 require('./src/routes/flashcards')(app)
 require('./src/routes/decks')(app)
 require('./src/routes/users')(app)
+require('./src/routes/me')(app)
 require('./src/routes/login')(app)
 
 // On gère les routes 404.

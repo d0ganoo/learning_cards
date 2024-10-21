@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
+import { AuthStatus, ClientContextType, TokenStoreType } from "./types";
 
-import { ClientContextType, TokenStoreType, AuthStatus } from "./types";
 
 const defaultContext: ClientContextType = {
   status: "anonymous",
@@ -24,11 +24,12 @@ export const makeClientProvider =
     const headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${refreshTokenStore.get()}`
     };
 
     const login = (
       path: string,
-      body: { username: string; password: string },
+      body: { username: string, password: string },
       successCallback: (ret: any) => void,
       failureCallback = () => {}
     ) => {

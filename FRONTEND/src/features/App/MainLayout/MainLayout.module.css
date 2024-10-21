@@ -1,0 +1,14 @@
+.link {
+    color: #ffffff;
+}
+
+.manage-drawer {
+    position: absolute !important;
+    bottom: 0px;
+}
+
+.leftBloc {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+}
