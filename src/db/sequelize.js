@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize')
 const FlashcardModel = require('../models/flashcard')
+const DeckModel = require('../models/deck')
 const bcrypt = require('bcrypt')
 // const PokemonModel = require('../models/pokemon')
 const UserModel = require('../models/user')
@@ -27,6 +28,7 @@ let sequelize
   
 // }
 const User = UserModel(sequelize, DataTypes)
+const Deck = DeckModel(sequelize)
 const Flashcard = FlashcardModel(sequelize)
 
 const initDb = () => {
@@ -45,5 +47,5 @@ const initDb = () => {
 }
 
 module.exports = { 
-  initDb, User, Flashcard
+  initDb, User, Flashcard, Deck
 }

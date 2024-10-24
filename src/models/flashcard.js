@@ -28,11 +28,15 @@ module.exports = (sequelize) => {
 
   Flashcard.associate = (models) => {
     Flashcard.belongsTo(models.Deck, {
-      foreignKey: 'deckId',
+      foreignKey: 'deckId',  // Utilisez 'deckId' comme clé étrangère
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
-    })
-  }
+    });
 
+    Flashcard.belongsTo(models.User, {
+      foreignKey: 'ownerId',  // Utilisez 'ownerId' pour faire correspondre la migration
+      onDelete: 'CASCADE',
+    });
+  };
   return Flashcard
 }

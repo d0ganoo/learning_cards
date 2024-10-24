@@ -11,6 +11,7 @@ module.exports = (app) => {
       additionalAnswer: Joi.string(),
       visibility: Joi.string().valid('public', 'private').default('public'),
       deckId: Joi.number().integer().min(1),
+      ownerId: Joi.number().integer().required(),
     });
 
     return schema.validate(data);
@@ -58,6 +59,7 @@ module.exports = (app) => {
       additionalAnswer,
       visibility,
       deckId,
+      ownerId,
     } = value
 
     try {
@@ -68,6 +70,7 @@ module.exports = (app) => {
         additionalAnswer,
         visibility,
         deckId,
+        ownerId,
       })
 
       res.status(201).json(newFlashcard)
@@ -94,6 +97,7 @@ module.exports = (app) => {
       additionalAnswer,
       visibility,
       deckId,
+      ownerId,
     } = value
 
     try {
@@ -109,6 +113,7 @@ module.exports = (app) => {
       flashcard.additionalAnswer = additionalAnswer
       flashcard.visibility = visibility
       flashcard.deckId = deckId
+      flashcard.ownerId = ownerId
 
       await flashcard.save()
 
