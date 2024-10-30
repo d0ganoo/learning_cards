@@ -1,185 +1,124 @@
 import React, { useEffect } from "react";
 import { AuthStatus, ClientContextType, TokenStoreType } from "./types";
 
-
 const defaultContext: ClientContextType = {
   status: "anonymous",
-  login: () => () => {},
-  get: () => () => {},
-  post: () => () => {},
-  put: () => () => {},
-  patch: () => () => {},
-  deletion: () => () => {},
-  setStatus: () => {},
-  refreshTokenStore: {  get: () => "", set: () => {}, clear: () => {} }
+  login: async () => Promise.resolve({} as any),
+  get: async () => Promise.resolve({} as any),
+  post: async () => Promise.resolve({} as any),
+  put: async () => Promise.resolve({} as any),
+  patch: async () => Promise.resolve({} as any),
+  deletion: async () => Promise.resolve(),
+  setStatus: () => { },
+  refreshTokenStore: { get: () => "", set: () => { }, clear: () => { } },
 };
 
-export const ClientContext =
-  React.createContext<ClientContextType>(defaultContext);
+export const ClientContext = React.createContext<ClientContextType>(defaultContext);
 
 export const makeClientProvider =
   (refreshTokenStore: TokenStoreType): React.FC<any> =>
-  ({ children }) => {
-    const [status, setStatus] = React.useState<AuthStatus>("anonymous");
-    const headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${refreshTokenStore.get()}`
-    };
+    ({ children }) => {
+      const [status, setStatus] = React.useState<AuthStatus>("anonymous");
 
-    const login = (
-      path: string,
-      body: { username: string, password: string },
-      successCallback: (ret: any) => void,
-      failureCallback = () => {}
-    ) => {
-      let active = true;
+      const headers = () => ({
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${refreshTokenStore.get()}`,
+      });
 
-      console.log("path", path)
-
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      })
-        .then((res) => res.json())
-        .then((ret) => {
-          console.log("ret", ret)
-          if (active && ret) {
-            if (ret.errors) 
-            {
-              setStatus("anonymous");
-              failureCallback();
-            }
-            else {
-              refreshTokenStore.set(ret.token);
-              setStatus("authenticated");
-              successCallback(ret);
-            }
-          }
+      // Login function
+      const login = async (path: string, body: { username: string; password: string }) => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "POST",
+          headers: headers(),
+          body: JSON.stringify(body),
         });
-      return () => {
-        active = false;
-      };
-    };
-
-    const get = (
-      path: string,
-      successCallback: (ret: any) => void,
-      toJson = true,
-      failureCallback = () => {}
-    ) => {
-      let active = true;
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, { method: "GET", headers })
-        .then((res) => (toJson ? res.json() : res.blob()))
-        .then((ret) => {
-          if (active && ret)
-            ret.errors ? failureCallback() : successCallback(ret);
-        });
-      return () => {
-        active = false;
-      };
-    };
-
-    const post = (
-      path: string,
-      data: any,
-      successCallback: ((createdId: string) => void) | (() => void),
-      failureCallback: () => void
-    ) => {
-      let active = true;
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, { method: "POST", headers, body: JSON.stringify(data) }).then((res) => {
-        if (
-          active &&
-          (res.status === 201 || res.status === 204 || res.status === 202)
-        ) {
-          /* Get ID of the created resource if it exists */
-          const createdId = res.headers.get("Location")?.split("/")?.pop()!;
-          return successCallback(createdId);
+        const data = await response.json();
+        if (data?.token) {
+          refreshTokenStore.set(data.token);
+          setStatus("authenticated");
+          return data;
         } else {
-          return failureCallback();
+          setStatus("anonymous");
+          throw new Error(data.errors?.[0]?.message || "Login failed");
         }
-      });
-      return () => {
-        active = false;
       };
-    };
 
-    const put = (
-      path: string,
-      data: any,
-      successCallback: () => void,
-      failureCallback: () => void
-    ) => {
-      let active = true;
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, { method: "PUT", headers, body: data }).then((res) => {
-        return active && res.status === 202
-          ? successCallback()
-          : failureCallback();
-      });
-      return () => {
-        active = false;
-      };
-    };
-
-    const patch = (
-      path: string,
-      data: any,
-      successCallback: () => void,
-      failureCallback: () => void
-    ) => {
-      let active = true;
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, { method: "PATCH", headers, body: data }).then((res) => {
-        return active && res.status === 202
-          ? successCallback()
-          : failureCallback();
-      });
-      return () => {
-        active = false;
-      };
-    };
-
-    const deletion = (
-      path: string,
-      data: any,
-      successCallback: () => void,
-      failureCallback: (errorMessage: string) => void
-    ) => {
-      let active = true;
-      fetch(`${process.env.REACT_APP_URL_API}/${path}`, { method: "DELETE", headers, body: data })
-        .then((res) => {
-          if (res.status === 202) {
-            return null;
-          }
-          return res.json();
-        })
-        .then((ret) => {
-          if (active) {
-            if (ret && ret.errors) failureCallback(ret.errors[0].message);
-            else successCallback();
-          }
+      // Generic GET function
+      const get = async <R = any>(path: string, toJson = true): Promise<R> => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "GET",
+          headers: headers(),
         });
-      return () => {
-        active = false;
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return toJson ? response.json() : (response.blob() as unknown as R);
       };
+
+      // Generic POST function
+      const post = async <R = any>(path: string, data: any): Promise<R> => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "POST",
+          headers: headers(),
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to post data");
+        }
+        return response.status === 201 ? response.json() : ({} as R);
+      };
+
+      // Generic PUT function
+      const put = async <R = any>(path: string, data: any): Promise<R> => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "PUT",
+          headers: headers(),
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to update data");
+        }
+        return response.json();
+      };
+
+      // Generic PATCH function
+      const patch = async <R = any>(path: string, data: any): Promise<R> => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "PATCH",
+          headers: headers(),
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to patch data");
+        }
+        return response.json();
+      };
+
+      // Generic DELETE function
+      const deletion = async (path: string): Promise<void> => {
+        const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
+          method: "DELETE",
+          headers: headers(),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to delete data");
+        }
+      };
+
+      useEffect(() => {
+        const token = refreshTokenStore.get();
+        if (token) setStatus("authenticated");
+      }, []);
+
+      return (
+        <ClientContext.Provider
+          value={{ status, setStatus, login, get, post, put, patch, deletion, refreshTokenStore }}
+        >
+          {children}
+        </ClientContext.Provider>
+      );
     };
-
-    useEffect(() => {
-      const token = refreshTokenStore.get();
-
-      if (token) setStatus("authenticated");
-
-
-    }, []);
-
-    return (
-      <ClientContext.Provider
-        value={{ status, setStatus, login, get, post, put, patch, deletion, refreshTokenStore }}
-      >
-        {children}
-      </ClientContext.Provider>
-    );
-  };
 
 const AUTH_STORAGE_KEY = "auth";
 const refreshTokenStore: TokenStoreType = {

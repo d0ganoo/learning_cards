@@ -6,19 +6,25 @@ import reportWebVitals from './reportWebVitals';
 import { ClientProvider } from './contexts/Client/Client';
 import { UserProvider } from './contexts/User/User';
 import { BrowserRouter as Router } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from 'react-query'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const queryClient = new QueryClient()
+
 root.render(
   <React.StrictMode>
-    <ClientProvider>
-      <UserProvider>
-        <Router>
-          <App />
-        </Router>
-      </UserProvider>
-    </ClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ClientProvider>
+        <UserProvider>
+          <Router>
+            <App />
+          </Router>
+        </UserProvider>
+      </ClientProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );
 

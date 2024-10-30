@@ -1,5 +1,4 @@
-// fixtures.js
-module.exports = [
+const usersData = [
   {
     model: 'User',
     data: {
@@ -36,31 +35,39 @@ module.exports = [
       updatedAt: new Date(),
     },
   },
+];
 
-  // Fixtures pour les Decks
+const decksData = [
   {
     model: 'Deck',
     data: {
       name: 'Capitales Europe',
-      ownerId: 1,
+      ownerId: 1, // Référence au premier utilisateur
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
   {
     model: 'Deck',
     data: {
       name: 'Capitales Asie',
-      ownerId: 2,
+      ownerId: 2, // Référence au deuxième utilisateur
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
   {
     model: 'Deck',
     data: {
       name: 'Capitales Amérique',
-      ownerId: 2,
+      ownerId: 2, // Référence au deuxième utilisateur
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
+];
 
-  // Fixtures pour les Flashcards liées au Deck "Capitales Europe"
+const flashcardsData = [
   {
     model: 'Flashcard',
     data: {
@@ -68,8 +75,11 @@ module.exports = [
       answer: 'Paris',
       indice: 'La tour Eiffel se trouve dans cette ville.',
       additionalAnswer: 'Londres',
-      deckId: 1,
-      ownerId: 2,
+      visibility: 'public',  // Ajout du champ visibility
+      deckId: 1, // Correspond au deck "Capitales Europe"
+      ownerId: 2, // ID correspondant à Bob
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
   {
@@ -79,12 +89,13 @@ module.exports = [
       answer: 'Berlin',
       indice: 'La Porte de Brandebourg est un célèbre monument de cette ville.',
       additionalAnswer: 'Rome',
+      visibility: 'public',
       deckId: 1,
       ownerId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
-
-  // Fixtures pour les Flashcards liées au Deck "Capitales Asie"
   {
     model: 'Flashcard',
     data: {
@@ -92,8 +103,11 @@ module.exports = [
       answer: 'Tokyo',
       indice: 'Le mont Fuji est situé près de cette ville.',
       additionalAnswer: 'Pékin',
+      visibility: 'public',
       deckId: 2,
       ownerId: 3,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
   {
@@ -102,36 +116,14 @@ module.exports = [
       question: 'Quelle est la capitale de l\'Inde ?',
       answer: 'New Delhi',
       indice: 'Le Taj Mahal est un célèbre monument de cette ville.',
-      additionalAnswer: 'Bangkok',
+      additionalAnswer: 'Mumbai',
+      visibility: 'private', // Exemple d'une carte de flash avec visibilité différente
       deckId: 2,
-      ownerId: 3,
+      ownerId: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   },
-
-  // Fixtures pour les Flashcards liées au Deck "Capitales Amérique"
-  {
-    model: 'Flashcard',
-    data: {
-      question: 'Quelle est la capitale des États-Unis ?',
-      answer: 'Washington D.C.',
-      indice: 'Le Capitole est situé dans cette ville.',
-      additionalAnswer: 'Ottawa',
-      deckId: 3,
-      ownerId: 1,
-    },
-  },
-  {
-    model: 'Flashcard',
-    data: {
-      question: 'Quelle est la capitale du Brésil ?',
-      answer: 'Brasilia',
-      indice: 'Cette ville a été spécialement conçue pour être la capitale du pays.',
-      additionalAnswer: 'Buenos Aires',
-      deckId: 3,
-      ownerId: 1,
-    },
-  },
-
-
-  // Ajoute d'autres fixtures si nécessaire
 ];
+
+module.exports = { usersData, decksData, flashcardsData };

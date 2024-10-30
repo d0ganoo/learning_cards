@@ -10,12 +10,8 @@ module.exports = (sequelize) => {
   });
 
   Deck.associate = (models) => {
-    Deck.hasMany(models.Flashcard, { as: 'flashcards' });
-
-    Deck.belongsTo(models.User, {
-      foreignKey: 'ownerId',  // Utilisez 'ownerId' pour faire correspondre la migration
-      onDelete: 'CASCADE',
-    });
+    Deck.belongsTo(models.User, { foreignKey: 'ownerId' });
+    Deck.hasMany(models.Flashcard, { foreignKey: 'deckId' });
   };
 
   return Deck;

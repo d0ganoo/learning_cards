@@ -21,17 +21,19 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: {
-        msg: 'Le nom est déjà pris.'
-      }
+        msg: 'Le nom d’utilisateur est déjà pris.',
+      },
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: {
-        msg: 'Cet email a déjà associé à un compte.'
+        msg: 'Cet email est déjà associé à un compte.',
       },
       validate: {
-        isEmail: true,
+        isEmail: {
+          msg: 'L’email doit être valide.',
+        },
       },
     },
     password: {
@@ -39,6 +41,12 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
   });
+
+  // Ajoutez des associations ici
+  User.associate = (models) => {
+    User.hasMany(models.Deck, { foreignKey: 'ownerId' });
+    User.hasMany(models.Flashcard, { foreignKey: 'ownerId' });
+  };
 
   return User;
 };

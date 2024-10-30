@@ -1,12 +1,10 @@
-import React from "react";
-
-
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useClient } from "../Client/Client";
 import { UserContextType, UserDataContextType } from "./types";
 
-export const UserContext = React.createContext<UserContextType>({
+export const UserContext = createContext<UserContextType>({
   user: undefined,
-  refreshUser: () => {},
+  refreshUser: async () => {}, // Changez ici pour être compatible
 });
 
 interface Props {
@@ -14,20 +12,35 @@ interface Props {
 }
 
 export const UserProvider: React.FC<Props> = ({ children }) => {
-  const [me, setMe] = React.useState<UserDataContextType>(undefined);
+  const [me, setMe] = useState<UserDataContextType | undefined>(undefined);
   const { status, get } = useClient();
-  React.useEffect(() => {
-    if (status === "authenticated") {
-      return get<{ data: UserDataContextType }>("me", ({ data }) =>
-        setMe(data)
-      );
-    } else {
-      setMe(undefined);
-    }
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (status === "authenticated") {
+        try {
+          const response = await get<{ data: UserDataContextType }>("me");
+          setMe(response.data); // Mettez à jour l'état avec les données utilisateur
+        } catch (error) {
+          console.error("Erreur lors de la récupération de l'utilisateur:", error);
+          setMe(undefined); // En cas d'erreur, mettez l'utilisateur à undefined
+        }
+      } else {
+        setMe(undefined); // Si non authentifié, réinitialisez l'utilisateur
+      }
+    };
+
+    fetchUser();
   }, [status, get]);
 
-  const refreshUser = () =>
-    get<{ data: UserDataContextType }>("me", ({ data }) => setMe(data));
+  const refreshUser = async () => {
+    try {
+      const response = await get<{ data: UserDataContextType }>("me");
+      setMe(response.data); // Mettez à jour avec les données utilisateur
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement de l'utilisateur:", error);
+    }
+  };
 
   return (
     <UserContext.Provider value={{ user: me, refreshUser }}>
@@ -36,4 +49,4 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
   );
 };
 
-export const useUser = () => React.useContext(UserContext);
+export const useUser = () => useContext(UserContext);

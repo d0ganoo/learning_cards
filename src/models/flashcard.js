@@ -1,6 +1,4 @@
-// models/flashcard.js
-const { DataTypes } = require('sequelize')
-
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Flashcard = sequelize.define('Flashcard', {
@@ -24,19 +22,16 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('public', 'private'),
       defaultValue: 'public',
     },
-  })
+    ownerId: { // Assurez-vous d'ajouter ce champ si nécessaire
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+  });
 
   Flashcard.associate = (models) => {
-    Flashcard.belongsTo(models.Deck, {
-      foreignKey: 'deckId',  // Utilisez 'deckId' comme clé étrangère
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    });
-
-    Flashcard.belongsTo(models.User, {
-      foreignKey: 'ownerId',  // Utilisez 'ownerId' pour faire correspondre la migration
-      onDelete: 'CASCADE',
-    });
+    Flashcard.belongsTo(models.Deck, { foreignKey: 'deckId' });
+    Flashcard.belongsTo(models.User, { foreignKey: 'ownerId' });
   };
-  return Flashcard
-}
+
+  return Flashcard;
+};
