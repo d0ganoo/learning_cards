@@ -7,6 +7,7 @@ import { ClientProvider } from './contexts/Client/Client';
 import { UserProvider } from './contexts/User/User';
 import { BrowserRouter as Router } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { DeckProvider } from './contexts/UserDecks/Deck';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -20,7 +21,9 @@ root.render(
       <ClientProvider>
         <UserProvider>
           <Router>
-            <App />
+            <DeckProvider>
+              <App />
+            </DeckProvider>
           </Router>
         </UserProvider>
       </ClientProvider>

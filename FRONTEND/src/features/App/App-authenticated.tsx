@@ -5,6 +5,8 @@ import { Route, Routes } from "react-router-dom";
 import { HomePage } from "../HomePage/HomePage";
 import { MainLayout } from "./MainLayout/MainLayout";
 import { CardManager } from "../CardManager/CardManager";
+import { Quizz } from "../Quizz/Quizz";
+import { Explorer } from "../Explorer/Explorer";
 
 type RouteType = {
   path: string;
@@ -33,9 +35,9 @@ const AppAuthenticated: React.FC = () => {
     <MainLayout>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/carte-management" element={<CardManager/>} />
-        <Route path="/bibliotheque" element={<></>} />
-        <Route path="/entrainement" element={<></>} />
+        <Route path="/carte-management" element={<CardManager />} />
+        <Route path="/bibliotheque" element={<Explorer />} />
+        <Route path="/entrainement" element={<Quizz />} />
         <Route path="/examens" element={<></>} />
         <Route path="/connexion" element={<Login />} />
       </Routes>

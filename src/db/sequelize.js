@@ -47,5 +47,5 @@ const initDb = () => {
 }
 
 module.exports = { 
-  initDb, User, Flashcard, Deck
+  initDb, User, Flashcard, Deck, sequelize 
 }

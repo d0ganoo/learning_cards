@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, Modal, Typography, FormInstance } from "antd";
+import { Button, Modal, Typography, FormInstance, Card, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import styles from "./CardManager.module.css";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
@@ -7,32 +7,31 @@ import { Content } from "antd/es/layout/layout";
 import Title from "antd/es/typography/Title";
 import { FormCard } from "./Form/FormCard";
 import { useClient } from "../../contexts/Client/Client";
-import { useUser } from "../../contexts/User/User";  // Assurez-vous que ce chemin est correct
-import { useQuery, useMutation } from 'react-query';
+import { useUser } from "../../contexts/User/User";
+import { useMutation } from 'react-query';
+import { FormDeck } from "./Form/FormDeck";
+import { useDecks } from "../../contexts/UserDecks/Deck";
+import { useGetFlashCardsByDeckId } from "../../hooks/useGetFlashCardsByDeckId";
+
+type deckType = {
+  id: number;
+  name: String;
+}
 
 export const CardManager: React.FC = () => {
   useDocumentTitle("Learning card - Carte Management");
 
   const { post, get } = useClient();
-  const { user } = useUser();  // Récupère l'utilisateur du contexte
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const formRef = useRef<FormInstance>(null);
+  const { user } = useUser();
+  const { decks, isLoading: isDeckLoading, error: deckError, refetch: deckRefetch } = useDecks();
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isDeckModalOpen, setIsDeckModalOpen] = useState(false);
+  const [selectedDeck, setSelectedDeck] = useState<null | deckType>(null);
+  const formCardRef = useRef<FormInstance>(null);
+  const formDeckRef = useRef<FormInstance>(null);
+  const { data: cards = [], isLoading: isCardLoading, error: cardError, refetch: cardRefetch } = useGetFlashCardsByDeckId(selectedDeck?.id || null);
 
-  console.log("user", user)
 
-  // Fetch cards using react-query's useQuery
-  const { data: cards, isLoading, error, refetch } = useQuery(
-    'flashcards',
-    async () => {
-      const response = await get('flashcards');
-      return response;
-    },
-    {
-      onError: () => console.log('Erreur lors de la récupération des cartes'),
-    }
-  );
-
-  // Mutation to post a new card
   const { mutate: createCard } = useMutation(
     async (newCard: any) => {
       await post('flashcards', newCard);
@@ -40,7 +39,7 @@ export const CardManager: React.FC = () => {
     {
       onSuccess: () => {
         console.log('La carte a été enregistrée');
-        refetch(); // Rafraîchit la liste des cartes après un enregistrement réussi
+        cardRefetch();
       },
       onError: () => {
         console.log('La carte n\'a pas été enregistrée');
@@ -48,64 +47,181 @@ export const CardManager: React.FC = () => {
     }
   );
 
-  const showModal = () => {
-    setIsModalOpen(true);
+  const { mutate: createDeck } = useMutation(
+    async (newDeck: any) => {
+      await post('decks', newDeck);
+    },
+    {
+      onSuccess: () => {
+        console.log('Le deck a été enregistrée');
+        deckRefetch();
+      },
+      onError: () => {
+        console.log('Le deck n\'a pas été enregistrée');
+      },
+    }
+  );
+
+  // Handle card
+  const handleCardCancel = () => {
+    setIsCardModalOpen(false);
+    formCardRef.current && formCardRef.current.resetFields();
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    formRef.current && formRef.current.resetFields();
+  const handleCardOk = () => {
+    formCardRef.current && formCardRef.current.submit();
   };
 
-  const handleOk = () => {
-    formRef.current && formRef.current.submit();
-  };
-
-  const handleSubmit = (values: any) => {
+  const handleCardSubmit = (values: any) => {
     const card = {
       question: values.card.question,
       answer: values.card.answer,
       indice: values.card.clue,
       additionalAnswer: values.card.additionalAnswer,
       visibility: values.card.visibility ? "private" : "public",
-      ownerId: user?.id,  // Ajoute l'ID du propriétaire depuis le contexte user
+      deckId: values.card.deckId,
+      ownerId: user?.id,
     };
     createCard(card);
-    setIsModalOpen(false);
+    setIsCardModalOpen(false);
   };
+
+
+  // Handle deck
+  const handleDeckCancel = () => {
+    setIsDeckModalOpen(false);
+    formDeckRef.current && formDeckRef.current.resetFields();
+  };
+
+  const handleDeckOk = () => {
+    formDeckRef.current && formDeckRef.current.submit();
+  };
+
+  const handleDeckSubmit = (values: any) => {
+    const deck = {
+      name: values.deck.name,
+      ownerId: user?.id,
+    };
+    createDeck(deck);
+    setIsDeckModalOpen(false);
+  };
+
+  const handleDeckClick = (deck: deckType) => {
+    setSelectedDeck(deck);
+  };
+
+  // Colonnes du tableau pour les cartes
+  const columns = [
+    {
+      title: 'Question',
+      dataIndex: 'question',
+      key: 'question',
+      width: 400,
+    },
+    {
+      title: 'Réponse',
+      dataIndex: 'answer',
+      key: 'answer',
+      width: 400,
+    },
+    {
+      title: 'Réponse complémentaire',
+      dataIndex: 'additionnalAnswer',
+      key: 'additionnalAnswer',
+      width: 400,
+      render: (text: string) => text ? text : <span style={{ color: 'gray', opacity: 0.6 }}>Aucune donnée disponible</span>,
+    },
+    {
+      title: 'Indice',
+      dataIndex: 'indice',
+      key: 'indice',
+      width: 400,
+      render: (text: string) => text ? text : <span style={{ color: 'gray', opacity: 0.6 }}>Aucune donnée disponible</span>,
+    },
+  ];
 
   return (
     <Content className={styles.root}>
       <Title>Carte Management</Title>
-      <Button className={styles.button} onClick={showModal}>
-        <PlusOutlined /> Créer une carte
-      </Button>
-      
+      <div className={styles.buttonsContainer}>
+        <Button onClick={() => setIsDeckModalOpen(true)}>
+          <PlusOutlined /> Créer un Deck
+        </Button>
+        <Button onClick={() => setIsCardModalOpen(true)}>
+          <PlusOutlined /> Créer une carte
+        </Button>
+      </div>
+
       <Modal
         className={styles.root}
-        title="Créer une carte"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        title="Créer un Deck"
+        open={isDeckModalOpen}
+        onOk={handleDeckOk}
+        onCancel={handleDeckCancel}
         okText="Enregistrer"
         cancelText="Annuler"
       >
-        <FormCard ref={formRef} onSubmit={handleSubmit} />
+        <FormDeck ref={formDeckRef} onSubmit={handleDeckSubmit} />
       </Modal>
 
-      {isLoading ? (
-        <Typography.Text>Loading cards...</Typography.Text>
-      ) : error ? (
-        <Typography.Text type="danger">Erreur lors du chargement des cartes</Typography.Text>
+      <Modal
+        className={styles.root}
+        title="Créer une carte"
+        open={isCardModalOpen}
+        onOk={handleCardOk}
+        onCancel={handleCardCancel}
+        okText="Enregistrer"
+        cancelText="Annuler"
+      >
+        <FormCard ref={formCardRef} onSubmit={handleCardSubmit} decks={decks} />
+      </Modal>
+
+      {isDeckLoading ? (
+        <Typography.Text>Loading ...</Typography.Text>
+      ) : deckError ? (
+        <Typography.Text type="danger">Erreur lors du chargement des decks</Typography.Text>
       ) : (
-        <div>
-          {cards?.map((card: any) => (
-            <div key={card.id}>
-              <Typography.Title level={5}>{card.question}</Typography.Title>
-              <Typography.Paragraph>{card.answer}</Typography.Paragraph>
+        <React.Fragment>
+          <Typography.Title level={4}>Decks:</Typography.Title>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              {decks?.map((deck: any) => (
+                <Card
+                  key={deck.id}
+                  hoverable
+                  onClick={() => handleDeckClick(deck)}
+                  style={{
+                    width: 200,
+                    border: selectedDeck?.id === deck.id ? '1px solid #91caff' : '1px solid #d9d9d9',
+                    backgroundColor: selectedDeck?.id === deck.id ? '#f5faff' : '#fff',
+                    transition: 'background-color 0.3s, border-color 0.3s',
+                  }}
+                >
+                  <Typography.Text>{deck.name}</Typography.Text>
+                </Card>
+              ))}
             </div>
-          ))}
-        </div>
+
+            {selectedDeck?.id && (
+              <div style={{ marginTop: '20px' }}>
+                <Typography.Title level={4}>Cartes du deck: {selectedDeck?.name}</Typography.Title>
+                {isCardLoading ? (
+                  <Typography.Text>Loading...</Typography.Text>
+                ) : cardError ? (
+                  <Typography.Text type="danger">Erreur lors du chargement des cartes</Typography.Text>
+                ) : (
+                  <Table
+                    dataSource={cards}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={false}
+                    scroll={{ x: '100%' }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </React.Fragment>
       )}
     </Content>
   );

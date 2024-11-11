@@ -1,20 +1,21 @@
 import React, { forwardRef } from "react";
-import { Checkbox, Form, Input, FormInstance } from "antd";
+import { Checkbox, Form, Input, Select, FormInstance } from "antd";
 import styles from "./FormCard.module.css";
 
 type FormCardProps = {
     onSubmit: (values: any) => void;
+    decks: { id: number; name: string }[]; // Typage des decks en un tableau avec `id` et `name`
 }
 
-export const FormCard = forwardRef<FormInstance, FormCardProps>(({ onSubmit }, ref) => {
+export const FormCard = forwardRef<FormInstance, FormCardProps>(({ onSubmit, decks }, ref) => {
     const validateMessages = {
-        required: "La ${label} est obliatoire!",
+        required: "La ${label} est obligatoire!",
     };
 
     return (
         <Form
             className={styles.form}
-            name="nest-messages"
+            name="form-card"
             onFinish={onSubmit}
             style={{ maxWidth: 600 }}
             validateMessages={validateMessages}
@@ -22,6 +23,15 @@ export const FormCard = forwardRef<FormInstance, FormCardProps>(({ onSubmit }, r
         >
             <Form.Item label="Privé" name={["card", "visibility"]} valuePropName="checked">
                 <Checkbox />
+            </Form.Item>
+            <Form.Item name={["card", "deckId"]} label="Deck" rules={[{ required: true }]}>
+                <Select placeholder="Sélectionnez un deck">
+                    {decks.map(deck => (
+                        <Select.Option key={deck.id} value={deck.id}>
+                            {deck.name}
+                        </Select.Option>
+                    ))}
+                </Select>
             </Form.Item>
             <Form.Item name={["card", "question"]} label="Question" rules={[{ required: true }]}>
                 <Input.TextArea />

@@ -1,7 +1,17 @@
 const { Flashcard } = require('../db/sequelize');
 const { Deck } = require('../db/sequelize');
+const Joi = require('joi');
 
 module.exports = (app) => {
+
+  const validateDeck = (data) => {
+    const schema = Joi.object({
+      name: Joi.string().required(),
+      ownerId: Joi.number().integer().required(),
+    });
+
+    return schema.validate(data);
+  };
 
   app.get('/decks/:deckId/flashcards', async (req, res) => {
     const { deckId } = req.params;
@@ -21,7 +31,7 @@ module.exports = (app) => {
 
   // Route pour créer une nouvelle flashcard avec validation
   app.post('/decks', async (req, res) => {
-    const { error, value } = validateFlashcard(req.body)
+    const { error, value } = validateDeck(req.body)
 
     if (error) {
       return res.status(400).send(error.details[0].message)

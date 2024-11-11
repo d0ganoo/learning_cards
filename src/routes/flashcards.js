@@ -1,5 +1,6 @@
 const Joi = require('joi');
-const { Flashcard, User} = require('../db/sequelize');
+const { Flashcard, User } = require('../db/sequelize');
+const flashcard = require('../models/flashcard');
 
 module.exports = (app) => {
 
@@ -54,8 +55,6 @@ module.exports = (app) => {
       return res.status(400).send(error.details[0].message);
     }
 
-    console.log("Données validées:", value);
-
     const {
       question,
       answer,
@@ -66,15 +65,13 @@ module.exports = (app) => {
       ownerId,
     } = value;
 
-    console.log("ownerID => ", ownerId)
-
     try {
       // Vérifiez si le ownerId existe dans la table users
       const ownerExists = await User.findByPk(ownerId);
       if (!ownerExists) {
         return res.status(404).send('Utilisateur non trouvé');
       }
-      
+
       const newFlashcard = await Flashcard.create({
         question,
         answer,
@@ -119,8 +116,7 @@ module.exports = (app) => {
       if (!flashcard) {
         return res.status(404).send('Flashcard non trouvée');
       }
-
-      // Mettre à jour les propriétés de la flashcard
+      
       flashcard.question = question;
       flashcard.answer = answer;
       flashcard.indice = indice;

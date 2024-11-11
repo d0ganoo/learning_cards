@@ -35,10 +35,12 @@ module.exports = {
         createdAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
         updatedAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
       }, { transaction });
 
@@ -55,6 +57,7 @@ module.exports = {
         },
         ownerId: {
           type: Sequelize.INTEGER,
+          allowNull: false,
           references: {
             model: 'Users',
             key: 'id',
@@ -65,14 +68,16 @@ module.exports = {
         createdAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
         updatedAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
       }, { transaction });
 
-      // Création de la table Flashcards
+      // Création de la table Flashcards avec les nouvelles colonnes
       await queryInterface.createTable('Flashcards', {
         id: {
           type: Sequelize.INTEGER,
@@ -93,22 +98,14 @@ module.exports = {
         additionalAnswer: {
           type: Sequelize.STRING,
         },
-        visibility: {  // Ajout du champ visibility
+        visibility: {
           type: Sequelize.STRING,
           allowNull: false,
-          defaultValue: 'public', // Valeur par défaut
-        },
-        deckId: {
-          type: Sequelize.INTEGER,
-          references: {
-            model: 'Decks',
-            key: 'id',
-          },
-          onDelete: 'CASCADE',
-          onUpdate: 'CASCADE',
+          defaultValue: 'public',
         },
         ownerId: {
           type: Sequelize.INTEGER,
+          allowNull: false,
           references: {
             model: 'Users',
             key: 'id',
@@ -116,48 +113,76 @@ module.exports = {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
         },
+        deckId: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+          references: {
+            model: 'Decks',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        isDuplicated: { // Ajout du champ isDuplicated
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+        },
+        originalCardId: { // Ajout du champ originalCardId
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: {
+            model: 'Flashcards',
+            key: 'id',
+          },
+          onDelete: 'SET NULL',
+          onUpdate: 'CASCADE',
+        },
         createdAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
         updatedAt: {
           type: Sequelize.DATE,
           allowNull: false,
+          defaultValue: Sequelize.NOW,
         },
       }, { transaction });
 
       // Insérer les utilisateurs
       await queryInterface.bulkInsert('Users', usersData.map(user => ({
-        ...user.data, // Assurez-vous d'utiliser `data` pour accéder aux données
+        ...user.data,
         createdAt: new Date(),
         updatedAt: new Date(),
       })), { transaction });
 
       // Insérer les decks
       await queryInterface.bulkInsert('Decks', decksData.map(deck => ({
-        ...deck.data, // Assurez-vous d'utiliser `data` pour accéder aux données
+        ...deck.data,
         createdAt: new Date(),
         updatedAt: new Date(),
       })), { transaction });
 
       // Insérer les flashcards
       await queryInterface.bulkInsert('Flashcards', flashcardsData.map(card => ({
-        ...card.data, // Assurez-vous d'utiliser `data` pour accéder aux données
+        ...card.data,
         createdAt: new Date(),
         updatedAt: new Date(),
       })), { transaction });
 
-      // Valider la transaction si tout a réussi
       await transaction.commit();
     } catch (error) {
-      // Si une erreur se produit, annuler la transaction
       await transaction.rollback();
-      throw error; // Relancer l'erreur pour qu'elle puisse être gérée par la suite
+      throw error;
     }
   },
 
-  down: async (queryInterface, Sequelize) => {
-    // Supprimer les flashcards, les decks et les utilisateurs dans l'ordre inverse
+  down: async (queryInterface) => {
+    // Suppression des colonnes ajoutées dans Flashcards
+    await queryInterface.removeColumn('Flashcards', 'isDuplicated');
+    await queryInterface.removeColumn('Flashcards', 'originalCardId');
+    
+    // Suppression des tables
     await queryInterface.dropTable('Flashcards');
     await queryInterface.dropTable('Decks');
     await queryInterface.dropTable('Users');
