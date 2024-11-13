@@ -102,4 +102,25 @@ module.exports = (app) => {
         }
     });
 
+    app.get('/training-sessions/:deckId', async (req, res) => {
+        const { deckId } = req.params;
+    
+        try {
+            // Recherche de la dernière session active ou la plus récente pour le deck spécifié
+            const session = await TrainingSession.findOne({
+                where: { deckId: deckId },
+                order: [['createdAt', 'DESC']],  // Tri par date pour obtenir la plus récente
+                attributes: ['duration']         // Ne sélectionne que la colonne de durée
+            });
+    
+            // Si une session existe, retourne la durée; sinon, retourne null
+            const duration = session ? session.duration : null;
+            
+            res.json({ duration });
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la session:', error);
+            res.status(500).json({ message: 'Erreur serveur lors de la récupération de la session.' });
+        }
+    });
+
 };
