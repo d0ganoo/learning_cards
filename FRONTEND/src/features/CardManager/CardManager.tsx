@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, Modal, Typography, FormInstance, Card, Table } from "antd";
+import { Button, Modal, Typography, FormInstance, Card, Table, Pagination } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import styles from "./CardManager.module.css";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
@@ -21,7 +21,7 @@ type deckType = {
 export const CardManager: React.FC = () => {
   useDocumentTitle("Learning card - Carte Management");
 
-  const { post, get } = useClient();
+  const { post } = useClient();
   const { user } = useUser();
   const { decks, isLoading: isDeckLoading, error: deckError, refetch: deckRefetch } = useDecks();
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -31,6 +31,15 @@ export const CardManager: React.FC = () => {
   const formDeckRef = useRef<FormInstance>(null);
   const { data: cards = [], isLoading: isCardLoading, error: cardError, refetch: cardRefetch } = useGetFlashCardsByDeckId(selectedDeck?.id || null);
 
+  const [currentDeckPage, setCurrentDeckPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 14;
+  const deckPageSize = 14;
+
+  const paginatedDecks = decks.slice(
+    (currentDeckPage - 1) * deckPageSize,
+    currentDeckPage * deckPageSize
+  );
 
   const { mutate: createCard } = useMutation(
     async (newCard: any) => {
@@ -53,16 +62,15 @@ export const CardManager: React.FC = () => {
     },
     {
       onSuccess: () => {
-        console.log('Le deck a été enregistrée');
+        console.log('Le deck a été enregistré');
         deckRefetch();
       },
       onError: () => {
-        console.log('Le deck n\'a pas été enregistrée');
+        console.log('Le deck n\'a pas été enregistré');
       },
     }
   );
 
-  // Handle card
   const handleCardCancel = () => {
     setIsCardModalOpen(false);
     formCardRef.current && formCardRef.current.resetFields();
@@ -86,8 +94,6 @@ export const CardManager: React.FC = () => {
     setIsCardModalOpen(false);
   };
 
-
-  // Handle deck
   const handleDeckCancel = () => {
     setIsDeckModalOpen(false);
     formDeckRef.current && formDeckRef.current.resetFields();
@@ -108,9 +114,13 @@ export const CardManager: React.FC = () => {
 
   const handleDeckClick = (deck: deckType) => {
     setSelectedDeck(deck);
+    setCurrentPage(1);
   };
 
-  // Colonnes du tableau pour les cartes
+  const handleTableChange = (pagination: any) => {
+    setCurrentPage(pagination.current);
+  };
+
   const columns = [
     {
       title: 'Question',
@@ -126,8 +136,8 @@ export const CardManager: React.FC = () => {
     },
     {
       title: 'Réponse complémentaire',
-      dataIndex: 'additionnalAnswer',
-      key: 'additionnalAnswer',
+      dataIndex: 'additionalAnswer',
+      key: 'additionalAnswer',
       width: 400,
       render: (text: string) => text ? text : <span style={{ color: 'gray', opacity: 0.6 }}>Aucune donnée disponible</span>,
     },
@@ -143,15 +153,6 @@ export const CardManager: React.FC = () => {
   return (
     <Content className={styles.root}>
       <Title>Carte Management</Title>
-      <div className={styles.buttonsContainer}>
-        <Button onClick={() => setIsDeckModalOpen(true)}>
-          <PlusOutlined /> Créer un Deck
-        </Button>
-        <Button onClick={() => setIsCardModalOpen(true)}>
-          <PlusOutlined /> Créer une carte
-        </Button>
-      </div>
-
       <Modal
         className={styles.root}
         title="Créer un Deck"
@@ -182,10 +183,15 @@ export const CardManager: React.FC = () => {
         <Typography.Text type="danger">Erreur lors du chargement des decks</Typography.Text>
       ) : (
         <React.Fragment>
-          <Typography.Title level={4}>Decks:</Typography.Title>
+          <div className={styles.headerBlock}>
+            <Typography.Title className={styles.title} level={4}>Decks:</Typography.Title>
+            <Button onClick={() => setIsDeckModalOpen(true)}>
+              <PlusOutlined /> Créer un Deck
+            </Button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              {decks?.map((deck: any) => (
+              {paginatedDecks.map((deck: any) => (
                 <Card
                   key={deck.id}
                   hoverable
@@ -202,9 +208,22 @@ export const CardManager: React.FC = () => {
               ))}
             </div>
 
+            <Pagination
+              current={currentDeckPage}
+              pageSize={deckPageSize}
+              total={decks.length}
+              onChange={(page) => setCurrentDeckPage(page)}
+              style={{ textAlign: 'center', marginTop: '16px' }}
+            />
+
             {selectedDeck?.id && (
               <div style={{ marginTop: '20px' }}>
-                <Typography.Title level={4}>Cartes du deck: {selectedDeck?.name}</Typography.Title>
+                <div className={styles.headerBlock}>
+                  <Typography.Title className={styles.title} level={4}>Cartes du deck: {selectedDeck?.name}</Typography.Title>
+                  <Button onClick={() => setIsCardModalOpen(true)}>
+                    <PlusOutlined /> Créer une carte
+                  </Button>
+                </div>
                 {isCardLoading ? (
                   <Typography.Text>Loading...</Typography.Text>
                 ) : cardError ? (
@@ -214,8 +233,13 @@ export const CardManager: React.FC = () => {
                     dataSource={cards}
                     columns={columns}
                     rowKey="id"
-                    pagination={false}
+                    pagination={{
+                      current: currentPage,
+                      pageSize: pageSize,
+                      onChange: handleTableChange,
+                    }}
                     scroll={{ x: '100%' }}
+                    size="small"
                   />
                 )}
               </div>

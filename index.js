@@ -26,6 +26,8 @@ require('./src/routes/decks')(app)
 require('./src/routes/users')(app)
 require('./src/routes/me')(app)
 require('./src/routes/login')(app)
+require('./src/routes/flashcardStatus')(app)
+require('./src/routes/trainingSession')(app)
 
 // On gère les routes 404.
 app.use(({res}) => {

@@ -59,15 +59,25 @@ export const makeClientProvider =
       // Generic POST function
       const post = async <R = any>(path: string, data: any): Promise<R> => {
         const response = await fetch(`${process.env.REACT_APP_URL_API}/${path}`, {
-          method: "POST",
-          headers: headers(),
-          body: JSON.stringify(data),
+            method: "POST",
+            headers: headers(),
+            body: JSON.stringify(data),
         });
+    
         if (!response.ok) {
-          throw new Error("Failed to post data");
+            throw new Error("Failed to post data");
         }
-        return response.status === 201 ? response.json() : ({} as R);
-      };
+    
+        // Tente de parser la réponse JSON si elle existe, sinon retourne un objet vide
+        try {
+            return await response.json();
+        } catch (error) {
+            console.warn("La réponse ne contient pas de JSON valide.");
+            return {} as R; // Renvoie un objet vide si le parsing échoue
+        }
+    };
+    
+      
 
       // Generic PUT function
       const put = async <R = any>(path: string, data: any): Promise<R> => {
@@ -108,7 +118,11 @@ export const makeClientProvider =
 
       useEffect(() => {
         const token = refreshTokenStore.get();
-        if (token) setStatus("authenticated");
+        if (token)
+          setStatus("authenticated")
+        else
+          setStatus("anonymous")
+
       }, []);
 
       return (

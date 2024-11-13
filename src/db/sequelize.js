@@ -1,5 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize')
 const FlashcardModel = require('../models/flashcard')
+const TrainingSessionModel = require('../models/trainingSession')
+const FlashcardStatusModel = require('../models/flashcardStatus')
 const DeckModel = require('../models/deck')
 const bcrypt = require('bcrypt')
 // const PokemonModel = require('../models/pokemon')
@@ -30,6 +32,8 @@ let sequelize
 const User = UserModel(sequelize, DataTypes)
 const Deck = DeckModel(sequelize)
 const Flashcard = FlashcardModel(sequelize)
+const TrainingSession = TrainingSessionModel(sequelize)
+const FlashcardStatus = FlashcardStatusModel(sequelize)
 
 const initDb = () => {
   return sequelize.sync().then(_ => {
@@ -47,5 +51,5 @@ const initDb = () => {
 }
 
 module.exports = { 
-  initDb, User, Flashcard, Deck, sequelize 
+  initDb, User, Flashcard, Deck, TrainingSession, FlashcardStatus, sequelize 
 }

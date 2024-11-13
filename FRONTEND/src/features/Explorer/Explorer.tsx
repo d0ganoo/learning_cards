@@ -5,6 +5,7 @@ import { useClient } from '../../contexts/Client/Client';
 import { useUser } from '../../contexts/User/User';
 import { useDecks } from '../../contexts/UserDecks/Deck';
 import { DeckType, FlashcardType } from '../types';
+import styles from "./Explorer.module.css";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -136,6 +137,7 @@ export const Explorer: React.FC = () => {
                 rowKey="id"
                 loading={isLoading || isSearching}
                 pagination={{ pageSize: 10 }}
+                size="small"
             />
         </div>
     );

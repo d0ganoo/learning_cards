@@ -77,7 +77,7 @@ module.exports = {
         },
       }, { transaction });
 
-      // Création de la table Flashcards avec les nouvelles colonnes
+      // Création de la table Flashcards
       await queryInterface.createTable('Flashcards', {
         id: {
           type: Sequelize.INTEGER,
@@ -123,11 +123,11 @@ module.exports = {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
         },
-        isDuplicated: { // Ajout du champ isDuplicated
+        isDuplicated: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
-        originalCardId: { // Ajout du champ originalCardId
+        originalCardId: {
           type: Sequelize.INTEGER,
           allowNull: true,
           references: {
@@ -136,6 +136,106 @@ module.exports = {
           },
           onDelete: 'SET NULL',
           onUpdate: 'CASCADE',
+        },
+        createdAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.NOW,
+        },
+        updatedAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.NOW,
+        },
+      }, { transaction });
+
+      // Création de la table TrainingSession
+      await queryInterface.createTable('TrainingSessions', {
+        id: {
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        deckId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Decks',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        userId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Users',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        duration: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
+        createdAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.NOW,
+        },
+        updatedAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.NOW,
+        },
+      }, { transaction });
+
+      // Création de la table FlashcardStatus
+      await queryInterface.createTable('FlashcardStatuses', {
+        id: {
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        flashcardId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Flashcards',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        userId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Users',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        TrainingSessionId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'TrainingSessions',
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+        },
+        knowledgeStatus: {
+          type: Sequelize.STRING,
+          allowNull: false,
+          validate: {
+            isIn: [['known', 'unknown', 'thumb-up', 'thumb-down']],
+          },
         },
         createdAt: {
           type: Sequelize.DATE,
@@ -170,6 +270,7 @@ module.exports = {
         updatedAt: new Date(),
       })), { transaction });
 
+      // Commit de la transaction
       await transaction.commit();
     } catch (error) {
       await transaction.rollback();
@@ -178,13 +279,21 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
-    // Suppression des colonnes ajoutées dans Flashcards
-    await queryInterface.removeColumn('Flashcards', 'isDuplicated');
-    await queryInterface.removeColumn('Flashcards', 'originalCardId');
-    
-    // Suppression des tables
-    await queryInterface.dropTable('Flashcards');
-    await queryInterface.dropTable('Decks');
-    await queryInterface.dropTable('Users');
+    const transaction = await queryInterface.sequelize.transaction();
+    try {
+      // Suppression des tables FlashcardStatus et TrainingSessions
+      await queryInterface.dropTable('FlashcardStatuses', { transaction });
+      await queryInterface.dropTable('TrainingSessions', { transaction });
+
+      // Suppression des tables existantes
+      await queryInterface.dropTable('Flashcards', { transaction });
+      await queryInterface.dropTable('Decks', { transaction });
+      await queryInterface.dropTable('Users', { transaction });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   },
 };

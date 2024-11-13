@@ -13,7 +13,7 @@ interface Props {
 
 export const UserProvider: React.FC<Props> = ({ children }) => {
   const [me, setMe] = useState<UserDataContextType | undefined>(undefined);
-  const { status, get } = useClient();
+  const { status, get, setStatus } = useClient();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,6 +24,7 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
         } catch (error) {
           console.error("Erreur lors de la récupération de l'utilisateur:", error);
           setMe(undefined); // En cas d'erreur, mettez l'utilisateur à undefined
+          setStatus("anonymous");
         }
       } else {
         setMe(undefined); // Si non authentifié, réinitialisez l'utilisateur

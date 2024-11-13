@@ -7,12 +7,10 @@ import { useUser } from "../../contexts/User/User";
 
 const App = () => {
   const { status } = useClient();
-  const { user } = useUser();
-
   return (
     <div className={styles.root}>
       <React.Suspense fallback={<></>}>
-        {status === "authenticated" && user ? (
+        {status === "authenticated" ? (
           <AppAuthenticated />
         ) : (
           <AppUnauthenticated />

@@ -1,5 +1,11 @@
-.buttonsContainer {
+.title {
+    margin-top: 0;
+    margin-bottom: 0 !important;
+}
+
+.headerBlock {
     display: flex;
-    justify-content: end;
-    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
 }

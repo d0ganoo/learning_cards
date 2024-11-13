@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const { Flashcard, User } = require('../db/sequelize');
-const flashcard = require('../models/flashcard');
 
 module.exports = (app) => {
 
