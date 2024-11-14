@@ -92,6 +92,10 @@ export const CardManager: React.FC = () => {
       onSuccess: () => {
         setEditingCard(null);
         cardRefetch();
+        messageApi.open({
+          type: 'success',
+          content: 'La carte a été modifiée avec succès.',
+        });
       },
     }
   );
@@ -110,7 +114,7 @@ export const CardManager: React.FC = () => {
     const card = {
       question: values.card.question,
       answer: values.card.answer,
-      indice: values.card.clue,
+      indice: values.card.indice,
       additionalAnswer: values.card.additionalAnswer,
       visibility: values.card.visibility ? "private" : "public",
       deckId: selectedDeck?.id,
@@ -207,7 +211,13 @@ export const CardManager: React.FC = () => {
       >
         <FormDeck ref={formDeckRef} onSubmit={(values) => {
           const deck = { name: values.deck.name, ownerId: user?.id };
-          post('decks', deck).then(deckRefetch);
+          post('decks', deck).then(() => {
+            deckRefetch();
+            messageApi.open({
+              type: 'success',
+              content: 'Le deck a été créé avec succès.',
+            });
+          });
           setIsDeckModalOpen(false);
         }} />
       </Modal>

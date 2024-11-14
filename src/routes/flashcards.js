@@ -3,7 +3,21 @@ const { Flashcard, User } = require('../db/sequelize');
 
 module.exports = (app) => {
 
-  const validateFlashcard = (data) => {
+  const validateCreateFlashcard = (data) => {
+    const schema = Joi.object({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
+      indice: Joi.string().optional(),
+      additionalAnswer: Joi.string().optional(),
+      visibility: Joi.string().valid('public', 'private').default('public'),
+      deckId: Joi.number().integer().min(1).optional(),
+      ownerId: Joi.number().integer().required(),
+    });
+
+    return schema.validate(data);
+  };
+
+  const validateUpdateFlashcard = (data) => {
     const schema = Joi.object({
       question: Joi.string().required(),
       answer: Joi.string().required(),
@@ -47,7 +61,7 @@ module.exports = (app) => {
 
   // Route pour créer une nouvelle flashcard avec validation
   app.post('/flashcards', async (req, res) => {
-    const { error, value } = validateFlashcard(req.body);
+    const { error, value } = validateCreateFlashcard(req.body);
 
     if (error) {
       console.error("Validation Error:", error.details[0].message);
@@ -92,7 +106,7 @@ module.exports = (app) => {
   // Route pour modifier une flashcard avec validation
   app.put('/flashcards/:id', async (req, res) => {
     const { id } = req.params;
-    const { error, value } = validateFlashcard(req.body);
+    const { error, value } = validateUpdateFlashcard(req.body);
 
     if (error) {
       console.error("Validation Error:", error.details[0].message);
@@ -115,7 +129,7 @@ module.exports = (app) => {
       if (!flashcard) {
         return res.status(404).send('Flashcard non trouvée');
       }
-      
+
       flashcard.question = question;
       flashcard.answer = answer;
       flashcard.indice = indice;
