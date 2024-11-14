@@ -12,6 +12,7 @@ module.exports = (app) => {
       visibility: Joi.string().valid('public', 'private').default('public'),
       deckId: Joi.number().integer().min(1).optional(),
       ownerId: Joi.number().integer().required(),
+      id: Joi.number().integer().required(),
     });
 
     return schema.validate(data);
@@ -19,7 +20,6 @@ module.exports = (app) => {
 
   // Route pour obtenir toutes les flashcards
   app.get('/flashcards', async (req, res) => {
-    console.log('Début de la route /flashcards');
     try {
       const flashcards = await Flashcard.findAll();
       res.json(flashcards);
