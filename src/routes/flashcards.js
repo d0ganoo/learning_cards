@@ -7,8 +7,8 @@ module.exports = (app) => {
     const schema = Joi.object({
       question: Joi.string().required(),
       answer: Joi.string().required(),
-      indice: Joi.string().optional(),
-      additionalAnswer: Joi.string().optional(),
+      indice: Joi.string().allow('').optional(),
+      additionalAnswer: Joi.string().allow('').optional(),
       visibility: Joi.string().valid('public', 'private').default('public'),
       deckId: Joi.number().integer().min(1).optional(),
       ownerId: Joi.number().integer().required(),
@@ -21,8 +21,8 @@ module.exports = (app) => {
     const schema = Joi.object({
       question: Joi.string().required(),
       answer: Joi.string().required(),
-      indice: Joi.string().optional(),
-      additionalAnswer: Joi.string().optional(),
+      indice: Joi.string().allow('').optional(),
+      additionalAnswer: Joi.string().allow('').optional(),
       visibility: Joi.string().valid('public', 'private').default('public'),
       deckId: Joi.number().integer().min(1).optional(),
       ownerId: Joi.number().integer().required(),

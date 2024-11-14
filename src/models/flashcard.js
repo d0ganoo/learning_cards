@@ -7,7 +7,7 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
     answer: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     indice: {
@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     additionalAnswer: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     visibility: {

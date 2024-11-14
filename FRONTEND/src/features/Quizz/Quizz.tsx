@@ -7,6 +7,7 @@ import { useClient } from '../../contexts/Client/Client';
 import { useUser } from '../../contexts/User/User';
 import { useMutation, useQuery } from 'react-query';
 import styles from "./Quizz.module.css";
+import { CodeBlock } from './CodeBloc';
 
 type DeckType = { id: number; name: string };
 
@@ -43,21 +44,23 @@ export const Quizz: React.FC = () => {
         { enabled: decks.length > 0, refetchOnWindowFocus: false }
     );
 
+
+
     // Formatage dynamique des durées
     const formatDuration = (seconds: number) => {
         const days = Math.floor(seconds / 86400);
         const hours = Math.floor((seconds % 86400) / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const remainingSeconds = seconds % 60;
-        
+
         let result = '';
         if (days > 0) result += `${days}j `;
         if (hours > 0) result += `${hours}h `;
         if (minutes > 0) result += `${minutes}min`;
-        
+
         // Afficher les secondes uniquement si aucune autre unité n'est présente
         if (!days && !hours && !minutes) result = `${remainingSeconds}s`;
-        
+
         return result.trim();
     };
 
@@ -91,6 +94,8 @@ export const Quizz: React.FC = () => {
         };
     }, [selectedDeck, trainingStartTime]);
 
+
+
     const handleStatusChange = async (cardId: number, status: string) => {
         if (trainingSessionId && user) {
             await put(`flashcards/${cardId}/knowledge-status`, { knowledgeStatus: status, userId: user.id, trainingSessionId });
@@ -110,10 +115,14 @@ export const Quizz: React.FC = () => {
     }, [currentQuestionIndex, cards.length]);
 
     const moveToPreviousCard = useCallback(() => {
-        setCurrentQuestionIndex((prev) => (prev > 0 ? prev - 1 : cards.length - 1));
+        isSessionCompleted ?
+            setCurrentQuestionIndex((prev) => (prev > 0 ? prev : cards.length))
+            :
+            setCurrentQuestionIndex((prev) => (prev > 0 ? prev - 1 : cards.length - 1));
+
         setShowAnswer(false);
         setIsSessionCompleted(false);
-    }, [cards.length]);
+    }, [isSessionCompleted, cards.length]);
 
     const resetTrainingSession = () => {
         setTrainingSessionId(null);
@@ -154,7 +163,7 @@ export const Quizz: React.FC = () => {
                                 {deck.name}
                                 {sessionDurations && sessionDurations[deck.id] != null && (
                                     <Typography.Text italic style={{ fontSize: '12px', color: 'lightGrey', marginLeft: '10px' }}>
-                                        ({formatDuration(sessionDurations[deck.id])} d'entraînement) 
+                                        ({formatDuration(sessionDurations[deck.id])} d'entraînement)
                                     </Typography.Text>
                                 )}
                             </List.Item>
@@ -175,8 +184,30 @@ export const Quizz: React.FC = () => {
                     {isSessionCompleted ? 'Félicitations!' : `Question ${currentQuestionIndex + 1}/${cards.length}`}
                 </Typography.Title>
                 {!isSessionCompleted && <Progress percent={parseFloat((((currentQuestionIndex + 1) / cards.length) * 100).toFixed(0))} status="active" />}
-                {!isSessionCompleted && <Typography.Paragraph>{currentCard.question}</Typography.Paragraph>}
-                {showAnswer && !isSessionCompleted && <Typography.Paragraph strong style={{ color: 'green' }}>{currentCard.answer}</Typography.Paragraph>}
+                {!isSessionCompleted && <Typography.Paragraph style={{ fontWeight: 'bold', fontSize: '16px', marginTop: '8px', marginBottom: '15px' }}>{currentCard.question}</Typography.Paragraph>}
+                {showAnswer && !isSessionCompleted &&
+                    <div className={styles.containerCode}>
+                        {
+                            /<pre[^>]*>[\s\S]*?<\/pre>/g.test(currentCard.answer) ? (
+                                // Cas où il y a un bloc de code <pre>
+                                <CodeBlock language="javascript" code={currentCard.answer} />
+                            ) : /<p[^>]*>[\s\S]*?<\/p>/g.test(currentCard.answer) ? (
+                                // Cas où le contenu est dans une balise <p>
+                                <div style={{ fontWeight: 'bold', color: 'green', maxHeight: '300px', overflow: 'auto', paddingLeft: '15px', paddingRight: '15px' }} dangerouslySetInnerHTML={{ __html: currentCard.answer }} />
+                            ) : /<[^>]+>/g.test(currentCard.answer) ? (
+                                // Cas où il y a des balises HTML autres que <pre> ou <p>
+                                <div style={{ fontWeight: 'normal', paddingLeft: '15px', paddingRight: '15px', border: '1px solid #ccc', maxHeight: '300px', overflow: 'auto' }}>
+                                    <div dangerouslySetInnerHTML={{ __html: currentCard.answer }} />
+                                </div>
+                            ) : (
+                                // Cas où il n'y a pas de HTML, juste du texte brut
+                                <div style={{ fontWeight: 'bold', color: 'green' }}>
+                                    {currentCard.answer}
+                                </div>
+                            )
+                        }
+                    </div>
+                }
 
                 {isSessionCompleted ? (
                     <Typography.Paragraph style={{ color: 'green', fontWeight: 'bold' }}>

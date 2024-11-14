@@ -146,6 +146,24 @@ export const CardManager: React.FC = () => {
     formCardRef.current && formCardRef.current.setFieldsValue({ card });
   };
 
+  const extractTextFromHtml = (htmlString: any) => {
+    // Créer un élément DOM temporaire
+    const tempDiv = document.createElement('div');
+    
+    // Insérer le HTML dans l'élément temporaire
+    tempDiv.innerHTML = htmlString;
+    
+    // Vérifier si la balise <pre> est présente
+    const preElement = tempDiv.querySelector('pre');
+    
+    if (preElement) {
+      return 'Le contenu est un bloc de code';
+    }
+    
+    // Si <pre> n'est pas présent, extraire et retourner le texte brut sans balises HTML
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
   const columns = [
     {
       title: 'Question',
@@ -158,6 +176,7 @@ export const CardManager: React.FC = () => {
       dataIndex: 'answer',
       key: 'answer',
       width: 400,
+      render: (text: string) => text ? extractTextFromHtml(text) : <span style={{ color: 'gray', opacity: 0.6 }}>Aucune donnée disponible</span>,
     },
     {
       title: 'Réponse complémentaire',
@@ -230,6 +249,7 @@ export const CardManager: React.FC = () => {
         okText="Enregistrer"
         cancelText="Annuler"
         destroyOnClose={true}
+        width={580}
       >
         <FormCard ref={formCardRef} onSubmit={handleCardSubmit} initialData={editingCard} />
       </Modal>

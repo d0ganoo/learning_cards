@@ -89,14 +89,14 @@ module.exports = {
           allowNull: false,
         },
         answer: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           allowNull: false,
         },
         indice: {
           type: Sequelize.STRING,
         },
         additionalAnswer: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
         },
         visibility: {
           type: Sequelize.STRING,
